@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Norræn Goðafræði - Spurningaleikur</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0d0d1a;
+      color: #e8e0d0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 620px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #c9a84c;
+      margin-bottom: 0.3rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #7a7090;
+      margin-bottom: 1.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid #2e2a3e;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      color: #7a7090;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover { border-color: #c9a84c; color: #c9a84c; }
+
+    .filter-btn.active {
+      background: #c9a84c;
+      border-color: #c9a84c;
+      color: #0d0d1a;
+      font-weight: 600;
+    }
+
+    .counter {
+      text-align: center;
+      font-size: 0.78rem;
+      color: #4a4460;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .card {
+      background: #13111f;
+      border: 1px solid #2e2a3e;
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .q-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.2rem;
+    }
+
+    .q-num {
+      font-size: 0.75rem;
+      color: #4a4460;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-easy   { background: #1a3a2a; color: #5dbb8a; }
+    .badge-medium { background: #3a2e10; color: #c9a84c; }
+    .badge-hard   { background: #3a1515; color: #e05555; }
+
+    .q-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.5;
+      color: #e8e0d0;
+      margin-bottom: 1.5rem;
+    }
+
+    .reveal-btn {
+      background: transparent;
+      border: 1px solid #2e2a3e;
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: #7a7090;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .reveal-btn:hover { border-color: #c9a84c; color: #c9a84c; }
+
+    .answer-box {
+      background: #1e1a2e;
+      border-left: 3px solid #c9a84c;
+      border-radius: 8px;
+      padding: 0.9rem 1.2rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #c9a84c;
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    .next-btn {
+      width: 100%;
+      background: #c9a84c;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0d0d1a;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .next-btn:hover { background: #dbbe6a; }
+    .next-btn:active { transform: scale(0.98); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>⚡ Norræn Goðafræði</h1>
+  <p class="subtitle">Spurningaleikur &mdash; 75 spurningar</p>
+
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('all', this)">Allar (75)</button>
+    <button class="filter-btn" onclick="setFilter('easy', this)">Léttar (1–15)</button>
+    <button class="filter-btn" onclick="setFilter('medium', this)">Grunnur (16–45)</button>
+    <button class="filter-btn" onclick="setFilter('hard', this)">Erfiðar (46–75)</button>
+  </div>
+
+  <div class="counter" id="counter">Spurningu 1 af 75</div>
+
+  <div class="card">
+    <div class="q-meta">
+      <span class="q-num" id="q-num">#1</span>
+      <span class="badge badge-easy" id="q-badge">Létt</span>
+    </div>
+    <div class="q-text" id="q-text">Hleður...</div>
+    <button class="reveal-btn" id="reveal-btn" onclick="revealAnswer()">Sjá svar</button>
+    <div class="answer-box" id="answer-box"></div>
+  </div>
+
+  <button class="next-btn" onclick="nextQuestion()">Næsta spurning →</button>
+
+</div>
+<script>
+const questions = [
+  {n:1,q:"Hver var æðstur goðanna?",a:"Óðinn",cat:"easy"},
+  {n:2,q:"Hvað hét hamar Þórs?",a:"Mjölnir",cat:"easy"},
+  {n:3,q:"Hver var guð þrumunnar?",a:"Þór",cat:"easy"},
+  {n:4,q:"Hver var þekktur fyrir svik og klókindi?",a:"Loki",cat:"easy"},
+  {n:5,q:"Hvað hét heimstréð?",a:"Yggdrasill",cat:"easy"},
+  {n:6,q:"Hvað hét heimur mannanna?",a:"Miðgarður",cat:"easy"},
+  {n:7,q:"Hvað hét heimur goðanna?",a:"Ásgarður",cat:"easy"},
+  {n:8,q:"Hver gætti Bifrastar?",a:"Heimdallur",cat:"easy"},
+  {n:9,q:"Hvað hét fyrsta mannfólkið?",a:"Askur og Embla",cat:"easy"},
+  {n:10,q:"Hver var eiginkona Þórs?",a:"Sif",cat:"easy"},
+  {n:11,q:"Hver átti epli æskunnar?",a:"Iðunn",cat:"easy"},
+  {n:12,q:"Hver var fagur og elskaður af öllum?",a:"Baldr",cat:"easy"},
+  {n:13,q:"Hver var móðir Baldurs?",a:"Frigg",cat:"easy"},
+  {n:14,q:"Hver var blindi bróðir Baldurs?",a:"Höður",cat:"easy"},
+  {n:15,q:"Hvað hét regnbogabrúin til Ásgarðs?",a:"Bifröst",cat:"easy"},
+  {n:16,q:"Úr hverju var heimurinn skapaður?",a:"Úr líkama Ýmis",cat:"medium"},
+  {n:17,q:"Hvað hét jötunninn sem var drepinn við sköpun heimsins?",a:"Ýmir",cat:"medium"},
+  {n:18,q:"Hvað hét kýrin sem nærði Ými?",a:"Auðhumla",cat:"medium"},
+  {n:19,q:"Hverjir sköpuðu heiminn samkvæmt goðsögunum?",a:"Óðinn, Vili og Vé",cat:"medium"},
+  {n:20,q:"Hverjir sköpuðu mannkynið?",a:"Óðinn, Vili og Vé",cat:"medium"},
+  {n:21,q:"Hvað varð blóð Ýmis að?",a:"Sjó og vötnum",cat:"medium"},
+  {n:22,q:"Hvað varð höfuðkúpa Ýmis að?",a:"Himninum",cat:"medium"},
+  {n:23,q:"Hvað hét heimur jötnanna?",a:"Jötunheimar / Útgarður",cat:"medium"},
+  {n:24,q:"Hvað heitir heimur dauðra?",a:"Helheimur / Hel",cat:"medium"},
+  {n:25,q:"Hver var gyðja ástar og frjósemi?",a:"Freyja",cat:"medium"},
+  {n:26,q:"Hvað hét spjót Óðins?",a:"Gungnir",cat:"medium"},
+  {n:27,q:"Hvað hét hringur Óðins?",a:"Draupnir",cat:"medium"},
+  {n:28,q:"Hvað hét áttfætti hestur Óðins?",a:"Sleipnir",cat:"medium"},
+  {n:29,q:"Hver átti gullna hárið?",a:"Sif",cat:"medium"},
+  {n:30,q:"Hver klippti af Sif hárið?",a:"Loki",cat:"medium"},
+  {n:31,q:"Hverjir smíðuðu nýtt hár á Sif?",a:"Dvergar",cat:"medium"},
+  {n:32,q:"Hvað fékk Þór frá dvergunum í sömu sögu?",a:"Mjölni",cat:"medium"},
+  {n:33,q:"Hvað er skáldskaparmjöðurinn?",a:"Drykkur sem veitir skáldskapargáfu og visku",cat:"medium"},
+  {n:34,q:"Hver sótti skáldskaparmjöðinn?",a:"Óðinn",cat:"medium"},
+  {n:35,q:"Hver var Kvasir?",a:"Vitr vera sem mjöðurinn tengdist",cat:"medium"},
+  {n:36,q:"Hvað notaði Óðinn til að komast undan með mjöðinn?",a:"Hann flaug í arnarham",cat:"medium"},
+  {n:37,q:"Hver rændi Iðunni?",a:"Þjassi",cat:"medium"},
+  {n:38,q:"Af hverju var brottnám Iðunnar svona hættulegt?",a:"Því goðin elstuðu án epla hennar",cat:"medium"},
+  {n:39,q:"Hver bar ábyrgð á því að Iðunn var lokkuð út?",a:"Loki",cat:"medium"},
+  {n:40,q:"Hver bjargaði Iðunni aftur?",a:"Loki",cat:"medium"},
+  {n:41,q:"Hvað vildi borgarsmiðurinn fá í laun?",a:"Freyju, sólina og tunglið",cat:"medium"},
+  {n:42,q:"Hvað hét hestur borgarsmiðsins?",a:"Svaðilfari",cat:"medium"},
+  {n:43,q:"Í hvað breytti Loki sér til að stöðva borgarsmiðinn?",a:"Í meri",cat:"medium"},
+  {n:44,q:"Hver varð afkvæmi Loka og Svaðilfara?",a:"Sleipnir",cat:"medium"},
+  {n:45,q:"Hver drap borgarsmiðinn þegar hann reyndist vera jötunn?",a:"Þór",cat:"medium"},
+  {n:46,q:"Hver fór með Þór til Útgarða-Loka?",a:"Loki og oft Þjálfi og Röskva",cat:"hard"},
+  {n:47,q:"Hver blekkti Þór og félaga hans með sjónhverfingum?",a:"Útgarða-Loki",cat:"hard"},
+  {n:48,q:"Hvað reyndi Þór að lyfta í höll Útgarða-Loka?",a:"Ketti",cat:"hard"},
+  {n:49,q:"Hvað var kötturinn í raun og veru?",a:"Miðgarðsormur",cat:"hard"},
+  {n:50,q:"Við hvað glímdi Þór sem reyndist vera Elli?",a:"Gamla konu",cat:"hard"},
+  {n:51,q:"Hvað táknaði Elli?",a:"Elli / öldrun",cat:"hard"},
+  {n:52,q:"Úr hverju drakk Þór í Útgarða-Loka?",a:"Úr horni",cat:"hard"},
+  {n:53,q:"Hverju var hornið tengt í raun?",a:"Sjónum",cat:"hard"},
+  {n:54,q:"Af hverju er saga Útgarða-Loka mikilvæg?",a:"Hún sýnir blekkingar og að Þór glímdi við frumöfl",cat:"hard"},
+  {n:55,q:"Með hverjum fór Þór í veiðiför að Miðgarðsormi?",a:"Hymi",cat:"hard"},
+  {n:56,q:"Hvað notaði Þór sem agn í veiðiförinni?",a:"Uxahaus",cat:"hard"},
+  {n:57,q:"Hvern náði Þór á öngulinn?",a:"Miðgarðsorm",cat:"hard"},
+  {n:58,q:"Af hverju drap Þór ekki Miðgarðsorm þá?",a:"Því Hymir kom í veg fyrir það / skar á færið",cat:"hard"},
+  {n:59,q:"Hvernig dó Baldr?",a:"Hann var drepinn með mistilteini",cat:"hard"},
+  {n:60,q:"Hver lét Höð kasta mistilteininum?",a:"Loki",cat:"hard"},
+  {n:61,q:"Af hverju var mistilteinninn hættulegur Baldri?",a:"Frigg hafði ekki tekið eið af honum",cat:"hard"},
+  {n:62,q:"Hver var raunverulegur sökudólgur í dauða Baldurs?",a:"Loki",cat:"hard"},
+  {n:63,q:"Hvað reyndu goðin að gera eftir dauða Baldurs?",a:"Að fá hann aftur úr Hel",cat:"hard"},
+  {n:64,q:"Af hverju tókst þeim það ekki?",a:"Því ekki allir vildu gráta Baldur",cat:"hard"},
+  {n:65,q:"Hvernig var Loka refsað?",a:"Hann var bundinn og eitur draup á hann",cat:"hard"},
+  {n:66,q:"Hvað skýra kippir Loka samkvæmt goðsögunum?",a:"Jarðskjálfta",cat:"hard"},
+  {n:67,q:"Hvað eru Ragnarök?",a:"Endalok heimsins í norrænni goðafræði",cat:"hard"},
+  {n:68,q:"Hvað heitir veturinn mikli sem kemur fyrir Ragnarök?",a:"Fimbulvetur",cat:"hard"},
+  {n:69,q:"Hver drepur Óðin í Ragnarökum?",a:"Fenrir",cat:"hard"},
+  {n:70,q:"Hvern drepur Þór í Ragnarökum?",a:"Miðgarðsorm",cat:"hard"},
+  {n:71,q:"Hvað verður svo um Þór?",a:"Hann deyr skömmu síðar af eitri ormsins",cat:"hard"},
+  {n:72,q:"Hverjir drepa hvor annan í Ragnarökum?",a:"Heimdallur og Loki",cat:"hard"},
+  {n:73,q:"Hver brennir heiminn í Ragnarökum?",a:"Surtr",cat:"hard"},
+  {n:74,q:"Er Ragnarök aðeins endir eða líka nýtt upphaf?",a:"Bæði endir og nýtt upphaf",cat:"hard"},
+  {n:75,q:"Hvað gerist eftir Ragnarök?",a:"Nýr heimur rís og lífið endurnýjast",cat:"hard"},
+];
+
+let currentFilter = 'all';
+let pool = [];
+let seen = 0;
+let currentQ = null;
+
+function getPool() {
+  if (currentFilter === 'easy') return questions.filter(q => q.cat === 'easy');
+  if (currentFilter === 'medium') return questions.filter(q => q.cat === 'medium');
+  if (currentFilter === 'hard') return questions.filter(q => q.cat === 'hard');
+  return [...questions];
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  pool = shuffle(getPool());
+  seen = 0;
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (pool.length === 0 || seen >= pool.length) {
+    pool = shuffle(getPool());
+    seen = 0;
+  }
+  currentQ = pool[seen++];
+  document.getElementById('q-num').textContent = '#' + currentQ.n;
+  document.getElementById('q-text').textContent = currentQ.q;
+  const badge = document.getElementById('q-badge');
+  if (currentQ.cat === 'easy')   { badge.textContent = 'Létt';    badge.className = 'badge badge-easy'; }
+  if (currentQ.cat === 'medium') { badge.textContent = 'Grunnur'; badge.className = 'badge badge-medium'; }
+  if (currentQ.cat === 'hard')   { badge.textContent = 'Erfitt';  badge.className = 'badge badge-hard'; }
+  document.getElementById('answer-box').style.display = 'none';
+  document.getElementById('reveal-btn').style.display = 'inline-block';
+  document.getElementById('counter').textContent = 'Spurningu ' + seen + ' af ' + pool.length;
+}
+
+function revealAnswer() {
+  document.getElementById('answer-box').textContent = currentQ.a;
+  document.getElementById('answer-box').style.display = 'block';
+  document.getElementById('reveal-btn').style.display = 'none';
+}
+
+pool = shuffle(getPool());
+nextQuestion();
+</script>
+</body>
+</html>
