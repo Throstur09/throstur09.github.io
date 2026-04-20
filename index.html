@@ -1,328 +1,658 @@
-<!DOCTYPE html>
 <html lang="is">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Norræn Goðafræði - Spurningaleikur</title>
+  <title>Spurningakerfi – Borðspil</title>
   <style>
+    /* =============================================
+       GRUNNSTÍLAR
+       ============================================= */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      background: #0d0d1a;
-      color: #e8e0d0;
+      background: #f0f4f8;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
-    }
-
-    .container {
-      max-width: 620px;
-      width: 100%;
+      padding: 1rem;
+      color: #1a1a2e;
     }
 
     h1 {
       text-align: center;
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       font-weight: 700;
-      letter-spacing: 0.05em;
-      color: #c9a84c;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.25rem;
+      color: #1a1a2e;
     }
 
     .subtitle {
       text-align: center;
-      font-size: 0.85rem;
-      color: #7a7090;
-      margin-bottom: 1.8rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .filter-row {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      flex-wrap: wrap;
+      color: #555;
+      font-size: 0.9rem;
       margin-bottom: 1.5rem;
     }
 
-    .filter-btn {
-      background: transparent;
-      border: 1px solid #2e2a3e;
-      border-radius: 20px;
-      padding: 6px 16px;
-      font-size: 0.8rem;
-      color: #7a7090;
-      cursor: pointer;
-      transition: all 0.2s;
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    .filter-btn:hover { border-color: #c9a84c; color: #c9a84c; }
-
-    .filter-btn.active {
-      background: #c9a84c;
-      border-color: #c9a84c;
-      color: #0d0d1a;
-      font-weight: 600;
+    /* =============================================
+       TELJARI
+       ============================================= */
+    .counter-bar {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
     }
 
-    .counter {
+    .counter-item {
+      background: white;
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
       text-align: center;
-      font-size: 0.78rem;
-      color: #4a4460;
+    }
+
+    .counter-item span {
+      display: block;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    /* =============================================
+       TEGUNDAVAL
+       ============================================= */
+    .type-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .type-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 0.9rem 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      text-align: center;
+      line-height: 1.3;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+
+    .type-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .type-btn:active { transform: scale(0.97); }
+
+    /* Litir eftir tegund */
+    .type-btn.venjulegur { background: #3b82f6; color: white; }
+    .type-btn.blessun    { background: #22c55e; color: white; }
+    .type-btn.bolvun     { background: #a855f7; color: white; }
+
+    .type-btn.active {
+      outline: 3px solid #1a1a2e;
+      outline-offset: 2px;
+    }
+
+    .type-icon { font-size: 1.5rem; display: block; margin-bottom: 0.25rem; }
+
+    /* =============================================
+       SPURNINGAKORT
+       ============================================= */
+    #spurningakort {
+      background: white;
+      border-radius: 18px;
+      padding: 1.5rem;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.1);
       margin-bottom: 1rem;
+      display: none; /* falið þar til tegund er valin */
+    }
+
+    .kort-haus {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
-    .card {
-      background: #13111f;
-      border: 1px solid #2e2a3e;
-      border-radius: 16px;
-      padding: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    .q-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 1.2rem;
-    }
-
-    .q-num {
+    .tegund-merki {
+      border-radius: 8px;
+      padding: 0.25rem 0.75rem;
       font-size: 0.75rem;
-      color: #4a4460;
-    }
-
-    .badge {
-      font-size: 0.7rem;
-      padding: 2px 10px;
-      border-radius: 10px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-
-    .badge-easy   { background: #1a3a2a; color: #5dbb8a; }
-    .badge-medium { background: #3a2e10; color: #c9a84c; }
-    .badge-hard   { background: #3a1515; color: #e05555; }
-
-    .q-text {
-      font-size: 1.25rem;
-      font-weight: 600;
-      line-height: 1.5;
-      color: #e8e0d0;
-      margin-bottom: 1.5rem;
-    }
-
-    .reveal-btn {
-      background: transparent;
-      border: 1px solid #2e2a3e;
-      border-radius: 8px;
-      padding: 10px 20px;
-      color: #7a7090;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .reveal-btn:hover { border-color: #c9a84c; color: #c9a84c; }
-
-    .answer-box {
-      background: #1e1a2e;
-      border-left: 3px solid #c9a84c;
-      border-radius: 8px;
-      padding: 0.9rem 1.2rem;
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: #c9a84c;
-      display: none;
-      animation: fadeIn 0.25s ease;
-    }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-    .next-btn {
-      width: 100%;
-      background: #c9a84c;
-      border: none;
-      border-radius: 10px;
-      padding: 14px;
-      font-size: 1rem;
       font-weight: 700;
-      color: #0d0d1a;
-      cursor: pointer;
-      letter-spacing: 0.03em;
-      transition: background 0.2s, transform 0.1s;
     }
 
-    .next-btn:hover { background: #dbbe6a; }
-    .next-btn:active { transform: scale(0.98); }
+    .merki-venjulegur { background: #dbeafe; color: #1d4ed8; }
+    .merki-blessun    { background: #dcfce7; color: #15803d; }
+    .merki-bolvun     { background: #f3e8ff; color: #7e22ce; }
+
+    .spurning-texti {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+      color: #1a1a2e;
+    }
+
+    /* =============================================
+       TAKKAR
+       ============================================= */
+    .takkar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .takki {
+      border: none;
+      border-radius: 12px;
+      padding: 0.8rem 1.2rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.1s;
+      width: 100%;
+    }
+
+    .takki:hover { opacity: 0.88; transform: translateY(-1px); }
+    .takki:active { transform: scale(0.98); }
+    .takki:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .takki-svar      { background: #f1f5f9; color: #334155; border: 1.5px solid #cbd5e1; }
+    .takki-rett      { background: #22c55e; color: white; }
+    .takki-rangt     { background: #ef4444; color: white; }
+    .takki-ny        { background: #6366f1; color: white; }
+
+    /* =============================================
+       SVAR-SVÆÐI
+       ============================================= */
+    #svar-svædi {
+      display: none;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .svar-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 0.4rem;
+    }
+
+    .svar-texti {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    /* =============================================
+       NIÐURSTAÐA
+       ============================================= */
+    #niðurstaða {
+      display: none;
+      border-radius: 14px;
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .niðurstaða-haus {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .niðurstaða-texti {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .n-rett {
+      background: #dcfce7;
+      border: 1.5px solid #86efac;
+      color: #14532d;
+    }
+
+    .n-rangt {
+      background: #fee2e2;
+      border: 1.5px solid #fca5a5;
+      color: #7f1d1d;
+    }
+
+    .n-ekkert {
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      color: #334155;
+    }
+
+    /* =============================================
+       LEIÐBEININGAR
+       ============================================= */
+    .leidbeining {
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+      padding: 2rem 1rem;
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    .leidbeining-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+    /* =============================================
+       ADMIN SECTION
+       ============================================= */
+    details {
+      margin-top: 2rem;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    summary {
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #334155;
+      border-radius: 14px;
+    }
+
+    summary:hover { background: #f8fafc; }
+
+    .admin-inntak {
+      padding: 0 1.25rem 1.25rem;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .admin-inntak h3 {
+      font-size: 0.95rem;
+      margin: 1rem 0 0.5rem;
+      color: #1a1a2e;
+    }
+
+    .admin-inntak p {
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.6;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 0.75rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    code {
+      font-family: monospace;
+      background: #e2e8f0;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: #1e3a5f;
+    }
+
+    /* =============================================
+       RESPONSIVE
+       ============================================= */
+    @media (max-width: 400px) {
+      h1 { font-size: 1.4rem; }
+      .type-btn { font-size: 0.78rem; padding: 0.75rem 0.3rem; }
+      .spurning-texti { font-size: 1rem; }
+    }
   </style>
 </head>
 <body>
+
 <div class="container">
 
-  <h1>⚡ Norræn Goðafræði</h1>
-  <p class="subtitle">Spurningaleikur &mdash; 75 spurningar</p>
+  <h1>🎲 Spurningakerfi</h1>
+  <p class="subtitle">Goðafræði &amp; Ásatrú – Borðspil</p>
 
-  <div class="filter-row">
-    <button class="filter-btn active" onclick="setFilter('all', this)">Allar (75)</button>
-    <button class="filter-btn" onclick="setFilter('easy', this)">Léttar (1–15)</button>
-    <button class="filter-btn" onclick="setFilter('medium', this)">Grunnur (16–45)</button>
-    <button class="filter-btn" onclick="setFilter('hard', this)">Erfiðar (46–75)</button>
-  </div>
-
-  <div class="counter" id="counter">Spurningu 1 af 75</div>
-
-  <div class="card">
-    <div class="q-meta">
-      <span class="q-num" id="q-num">#1</span>
-      <span class="badge badge-easy" id="q-badge">Létt</span>
+  <!-- TELJARI -->
+  <div class="counter-bar">
+    <div class="counter-item">
+      <span id="teljari-heild">0</span>
+      Spurningar notaðar
     </div>
-    <div class="q-text" id="q-text">Hleður...</div>
-    <button class="reveal-btn" id="reveal-btn" onclick="revealAnswer()">Sjá svar</button>
-    <div class="answer-box" id="answer-box"></div>
+    <div class="counter-item">
+      <span id="teljari-rett">0</span>
+      Rétt svör
+    </div>
+    <div class="counter-item">
+      <span id="teljari-rangt">0</span>
+      Röng svör
+    </div>
   </div>
 
-  <button class="next-btn" onclick="nextQuestion()">Næsta spurning →</button>
+  <!-- TEGUNDAVAL -->
+  <div class="type-selector">
+    <button class="type-btn venjulegur" onclick="velja('venjulegur')">
+      <span class="type-icon">🔵</span>
+      Venjulegur reitur
+    </button>
+    <button class="type-btn blessun" onclick="velja('blessun')">
+      <span class="type-icon">⭐</span>
+      Blessunarreitur
+    </button>
+    <button class="type-btn bolvun" onclick="velja('bolvun')">
+      <span class="type-icon">💀</span>
+      Bölvunarreitur
+    </button>
+  </div>
+
+  <!-- LEIÐBEINING (sjáanlegt þegar ekkert er valið) -->
+  <div class="leidbeining" id="leidbeining">
+    <div class="leidbeining-icon">👆</div>
+    <strong>Veldu tegund reitsins</strong><br>
+    sem spilari lenti á til að sjá spurningu
+  </div>
+
+  <!-- SPURNINGAKORT -->
+  <div id="spurningakort">
+
+    <!-- Haus með tegundamerki -->
+    <div class="kort-haus">
+      <span id="tegund-merki" class="tegund-merki"></span>
+      <span id="tegund-texti" style="color:#64748b;"></span>
+    </div>
+
+    <!-- Spurning -->
+    <div class="spurning-texti" id="spurning-texti">...</div>
+
+    <!-- Svar (falið þar til smellt er á "Sýna svar") -->
+    <div id="svar-svædi">
+      <div class="svar-label">Rétt svar</div>
+      <div class="svar-texti" id="svar-texti"></div>
+    </div>
+
+    <!-- Niðurstaða -->
+    <div id="niðurstaða">
+      <div class="niðurstaða-haus" id="niðurstaða-haus"></div>
+      <div class="niðurstaða-texti" id="niðurstaða-texti"></div>
+    </div>
+
+    <!-- Takkar -->
+    <div class="takkar">
+      <button class="takki takki-svar" id="takki-svar" onclick="sýnaSvar()">👁 Sýna svar</button>
+      <button class="takki takki-rett" id="takki-rett" onclick="svarað('rett')" disabled>✅ Rétt svarað</button>
+      <button class="takki takki-rangt" id="takki-rangt" onclick="svarað('rangt')" disabled>❌ Rangt svarað</button>
+      <button class="takki takki-ny" onclick="nýSpurning()">🔄 Ný spurning</button>
+    </div>
+
+  </div>
+
+  <!-- ADMIN LEIÐBEININGAR -->
+  <details>
+    <summary>⚙️ Hvernig bæti ég inn eigin spurningum?</summary>
+    <div class="admin-inntak">
+      <h3>Uppbygging spurningar</h3>
+      <p>
+        Opnaðu þessa HTML skrá í textaritli (t.d. Notepad, VS Code).<br><br>
+        Finndu hlutann sem byrjar á <code>const spurningar = {</code> í JavaScript-kóðanum.<br><br>
+        Þar eru þrír listar: <code>venjulegur</code>, <code>blessun</code> og <code>bolvun</code>.<br><br>
+        Hvert stak hefur þessa uppbyggingu:<br><br>
+        <code>{ spurning: "Spurningin hér?", svar: "Svarið hér", bonus: "Hvað gerist" }</code><br><br>
+        Fyrir <strong>venjulegar</strong> og <strong>blessunar</strong>spurningar skaltu nota <code>bonus</code> (gefið við rétt svar).<br>
+        Fyrir <strong>bölvunar</strong>spurningar skaltu nota <code>refsing</code> (gefið við rangt svar).
+      </p>
+    </div>
+  </details>
 
 </div>
+
 <script>
-const questions = [
-  {n:1,q:"Hver var æðstur goðanna?",a:"Óðinn",cat:"easy"},
-  {n:2,q:"Hvað hét hamar Þórs?",a:"Mjölnir",cat:"easy"},
-  {n:3,q:"Hver var guð þrumunnar?",a:"Þór",cat:"easy"},
-  {n:4,q:"Hver var þekktur fyrir svik og klókindi?",a:"Loki",cat:"easy"},
-  {n:5,q:"Hvað hét heimstréð?",a:"Yggdrasill",cat:"easy"},
-  {n:6,q:"Hvað hét heimur mannanna?",a:"Miðgarður",cat:"easy"},
-  {n:7,q:"Hvað hét heimur goðanna?",a:"Ásgarður",cat:"easy"},
-  {n:8,q:"Hver gætti Bifrastar?",a:"Heimdallur",cat:"easy"},
-  {n:9,q:"Hvað hét fyrsta mannfólkið?",a:"Askur og Embla",cat:"easy"},
-  {n:10,q:"Hver var eiginkona Þórs?",a:"Sif",cat:"easy"},
-  {n:11,q:"Hver átti epli æskunnar?",a:"Iðunn",cat:"easy"},
-  {n:12,q:"Hver var fagur og elskaður af öllum?",a:"Baldr",cat:"easy"},
-  {n:13,q:"Hver var móðir Baldurs?",a:"Frigg",cat:"easy"},
-  {n:14,q:"Hver var blindi bróðir Baldurs?",a:"Höður",cat:"easy"},
-  {n:15,q:"Hvað hét regnbogabrúin til Ásgarðs?",a:"Bifröst",cat:"easy"},
-  {n:16,q:"Úr hverju var heimurinn skapaður?",a:"Úr líkama Ýmis",cat:"medium"},
-  {n:17,q:"Hvað hét jötunninn sem var drepinn við sköpun heimsins?",a:"Ýmir",cat:"medium"},
-  {n:18,q:"Hvað hét kýrin sem nærði Ými?",a:"Auðhumla",cat:"medium"},
-  {n:19,q:"Hverjir sköpuðu heiminn samkvæmt goðsögunum?",a:"Óðinn, Vili og Vé",cat:"medium"},
-  {n:20,q:"Hverjir sköpuðu mannkynið?",a:"Óðinn, Vili og Vé",cat:"medium"},
-  {n:21,q:"Hvað varð blóð Ýmis að?",a:"Sjó og vötnum",cat:"medium"},
-  {n:22,q:"Hvað varð höfuðkúpa Ýmis að?",a:"Himninum",cat:"medium"},
-  {n:23,q:"Hvað hét heimur jötnanna?",a:"Jötunheimar / Útgarður",cat:"medium"},
-  {n:24,q:"Hvað heitir heimur dauðra?",a:"Helheimur / Hel",cat:"medium"},
-  {n:25,q:"Hver var gyðja ástar og frjósemi?",a:"Freyja",cat:"medium"},
-  {n:26,q:"Hvað hét spjót Óðins?",a:"Gungnir",cat:"medium"},
-  {n:27,q:"Hvað hét hringur Óðins?",a:"Draupnir",cat:"medium"},
-  {n:28,q:"Hvað hét áttfætti hestur Óðins?",a:"Sleipnir",cat:"medium"},
-  {n:29,q:"Hver átti gullna hárið?",a:"Sif",cat:"medium"},
-  {n:30,q:"Hver klippti af Sif hárið?",a:"Loki",cat:"medium"},
-  {n:31,q:"Hverjir smíðuðu nýtt hár á Sif?",a:"Dvergar",cat:"medium"},
-  {n:32,q:"Hvað fékk Þór frá dvergunum í sömu sögu?",a:"Mjölni",cat:"medium"},
-  {n:33,q:"Hvað er skáldskaparmjöðurinn?",a:"Drykkur sem veitir skáldskapargáfu og visku",cat:"medium"},
-  {n:34,q:"Hver sótti skáldskaparmjöðinn?",a:"Óðinn",cat:"medium"},
-  {n:35,q:"Hver var Kvasir?",a:"Vitr vera sem mjöðurinn tengdist",cat:"medium"},
-  {n:36,q:"Hvað notaði Óðinn til að komast undan með mjöðinn?",a:"Hann flaug í arnarham",cat:"medium"},
-  {n:37,q:"Hver rændi Iðunni?",a:"Þjassi",cat:"medium"},
-  {n:38,q:"Af hverju var brottnám Iðunnar svona hættulegt?",a:"Því goðin elstuðu án epla hennar",cat:"medium"},
-  {n:39,q:"Hver bar ábyrgð á því að Iðunn var lokkuð út?",a:"Loki",cat:"medium"},
-  {n:40,q:"Hver bjargaði Iðunni aftur?",a:"Loki",cat:"medium"},
-  {n:41,q:"Hvað vildi borgarsmiðurinn fá í laun?",a:"Freyju, sólina og tunglið",cat:"medium"},
-  {n:42,q:"Hvað hét hestur borgarsmiðsins?",a:"Svaðilfari",cat:"medium"},
-  {n:43,q:"Í hvað breytti Loki sér til að stöðva borgarsmiðinn?",a:"Í meri",cat:"medium"},
-  {n:44,q:"Hver varð afkvæmi Loka og Svaðilfara?",a:"Sleipnir",cat:"medium"},
-  {n:45,q:"Hver drap borgarsmiðinn þegar hann reyndist vera jötunn?",a:"Þór",cat:"medium"},
-  {n:46,q:"Hver fór með Þór til Útgarða-Loka?",a:"Loki og oft Þjálfi og Röskva",cat:"hard"},
-  {n:47,q:"Hver blekkti Þór og félaga hans með sjónhverfingum?",a:"Útgarða-Loki",cat:"hard"},
-  {n:48,q:"Hvað reyndi Þór að lyfta í höll Útgarða-Loka?",a:"Ketti",cat:"hard"},
-  {n:49,q:"Hvað var kötturinn í raun og veru?",a:"Miðgarðsormur",cat:"hard"},
-  {n:50,q:"Við hvað glímdi Þór sem reyndist vera Elli?",a:"Gamla konu",cat:"hard"},
-  {n:51,q:"Hvað táknaði Elli?",a:"Elli / öldrun",cat:"hard"},
-  {n:52,q:"Úr hverju drakk Þór í Útgarða-Loka?",a:"Úr horni",cat:"hard"},
-  {n:53,q:"Hverju var hornið tengt í raun?",a:"Sjónum",cat:"hard"},
-  {n:54,q:"Af hverju er saga Útgarða-Loka mikilvæg?",a:"Hún sýnir blekkingar og að Þór glímdi við frumöfl",cat:"hard"},
-  {n:55,q:"Með hverjum fór Þór í veiðiför að Miðgarðsormi?",a:"Hymi",cat:"hard"},
-  {n:56,q:"Hvað notaði Þór sem agn í veiðiförinni?",a:"Uxahaus",cat:"hard"},
-  {n:57,q:"Hvern náði Þór á öngulinn?",a:"Miðgarðsorm",cat:"hard"},
-  {n:58,q:"Af hverju drap Þór ekki Miðgarðsorm þá?",a:"Því Hymir kom í veg fyrir það / skar á færið",cat:"hard"},
-  {n:59,q:"Hvernig dó Baldr?",a:"Hann var drepinn með mistilteini",cat:"hard"},
-  {n:60,q:"Hver lét Höð kasta mistilteininum?",a:"Loki",cat:"hard"},
-  {n:61,q:"Af hverju var mistilteinninn hættulegur Baldri?",a:"Frigg hafði ekki tekið eið af honum",cat:"hard"},
-  {n:62,q:"Hver var raunverulegur sökudólgur í dauða Baldurs?",a:"Loki",cat:"hard"},
-  {n:63,q:"Hvað reyndu goðin að gera eftir dauða Baldurs?",a:"Að fá hann aftur úr Hel",cat:"hard"},
-  {n:64,q:"Af hverju tókst þeim það ekki?",a:"Því ekki allir vildu gráta Baldur",cat:"hard"},
-  {n:65,q:"Hvernig var Loka refsað?",a:"Hann var bundinn og eitur draup á hann",cat:"hard"},
-  {n:66,q:"Hvað skýra kippir Loka samkvæmt goðsögunum?",a:"Jarðskjálfta",cat:"hard"},
-  {n:67,q:"Hvað eru Ragnarök?",a:"Endalok heimsins í norrænni goðafræði",cat:"hard"},
-  {n:68,q:"Hvað heitir veturinn mikli sem kemur fyrir Ragnarök?",a:"Fimbulvetur",cat:"hard"},
-  {n:69,q:"Hver drepur Óðin í Ragnarökum?",a:"Fenrir",cat:"hard"},
-  {n:70,q:"Hvern drepur Þór í Ragnarökum?",a:"Miðgarðsorm",cat:"hard"},
-  {n:71,q:"Hvað verður svo um Þór?",a:"Hann deyr skömmu síðar af eitri ormsins",cat:"hard"},
-  {n:72,q:"Hverjir drepa hvor annan í Ragnarökum?",a:"Heimdallur og Loki",cat:"hard"},
-  {n:73,q:"Hver brennir heiminn í Ragnarökum?",a:"Surtr",cat:"hard"},
-  {n:74,q:"Er Ragnarök aðeins endir eða líka nýtt upphaf?",a:"Bæði endir og nýtt upphaf",cat:"hard"},
-  {n:75,q:"Hvað gerist eftir Ragnarök?",a:"Nýr heimur rís og lífið endurnýjast",cat:"hard"},
-];
+  // =============================================
+  // SPURNINGAGRUNNUR
+  // Bættu við eigin spurningum hér!
+  // =============================================
+  const spurningar = {
 
-let currentFilter = 'all';
-let pool = [];
-let seen = 0;
-let currentQ = null;
+    // --------------------------------------------------
+    // VENJULEGIR REITIR – rétt svar gefur +1 reit
+    // (Goðafræði og ásatrú – grunnspurningar)
+    // --------------------------------------------------
+    venjulegur: [
+      { spurning: "Hvað heitir æðsti guð Norræna goðafræðinnar?", svar: "Óðinn (einnig kallaður Alfaðir)", bonus: "⚡ Óðinn blessar þig – +1 reit!" },
+      { spurning: "Hvað heitir hamar Þórs?", svar: "Mjölnir", bonus: "🔨 Mjölnir gefur þér kraft – +1 reit!" },
+      { spurning: "Í hvaða heimsvið búa Æsir guðirnir?", svar: "Ásgarður", bonus: "🏰 Ásgarður opnar hlið – +1 reit!" },
+      { spurning: "Hvað heitir heimstréð í norrænum goðsögum?", svar: "Yggdrasill", bonus: "🌳 Yggdrasill styrkir þig – +1 reit!" },
+      { spurning: "Hvað heitir bróðir Þórs og guð eldingar og bragðs?", svar: "Loki", bonus: "🔥 Loki er hlutlægur í þetta skiptið – +1 reit!" },
+      { spurning: "Hvað heitir guð ljóss og fegurðar í norrænum goðsögum?", svar: "Baldur", bonus: "☀️ Baldur skín yfir þig – +1 reit!" },
+      { spurning: "Hvað heita valkyrjurnar sem velja fallen stríðsmenn?", svar: "Valkyrjur", bonus: "⚔️ Valkyrjan velur þig – +1 reit!" },
+      { spurning: "Hvernig heitir hallan þar sem fallen vígar búa eftir dauðann?", svar: "Valhöll", bonus: "🍻 Þú ert boðinn í Valhöll – +1 reit!" },
+      { spurning: "Hvað heitir ormurinn sem gnagar við rætur Yggdrasils?", svar: "Níðhöggur", bonus: "🐍 Níðhöggur snýr sér frá þér – +1 reit!" },
+      { spurning: "Hvað heita þrjár nornir sem ráða yfir örlögum?", svar: "Urður, Verðandi og Skuld", bonus: "🌀 Nornirnar hlynna að þér – +1 reit!" },
+      { spurning: "Hvað heitir skip goðanna sem er smíðað úr neglum dauðra manna?", svar: "Naglfar", bonus: "⛵ Þú komst á undan Naglfar – +1 reit!" },
+      { spurning: "Hvað heitir guð hafins og sjávar í norrænum goðsögum?", svar: "Ægir", bonus: "🌊 Ægir gefur þér farveg – +1 reit!" },
+      { spurning: "Hvað heitir úlfrinn sem gleypir sólina við Ragnarök?", svar: "Fenrir (eða Fenrisúlfur)", bonus: "🐺 Þú sloppst undan Fenrir – +1 reit!" },
+      { spurning: "Hvað heitir guð skáldskapar og vísinda í norrænum goðsögum?", svar: "Bragi", bonus: "🎶 Bragi yrkir lof yfir þig – +1 reit!" },
+    ],
 
-function getPool() {
-  if (currentFilter === 'easy') return questions.filter(q => q.cat === 'easy');
-  if (currentFilter === 'medium') return questions.filter(q => q.cat === 'medium');
-  if (currentFilter === 'hard') return questions.filter(q => q.cat === 'hard');
-  return [...questions];
-}
+    // --------------------------------------------------
+    // BLESSUNARREITIR – rétt svar gefur stórt verðlaun
+    // (Erfiðari spurningar um goðafræði)
+    // --------------------------------------------------
+    blessun: [
+      { spurning: "Hvað heitir níu heimar Yggdrasils? Nefndu að minnsta kosti þrjá.", svar: "Ásgarður, Miðgarður, Útgarður, Jötunheimar, Niðavellir, Svartálfaheimur, Álfheimar, Muspellsheim, Niflheim", bonus: "🌟 Heimsmikil þekking! Farðu 3 reiti áfram!" },
+      { spurning: "Hvernig missti Óðinn annað augað sitt?", svar: "Hann fórnaði því til að fá að drekka af Mímisbrunnur (brunni visku)", bonus: "🌟 Fórn Óðins – Kastaðu aftur!" },
+      { spurning: "Hvað heitir sverð Freyr og hvers vegna missti hann það?", svar: "Skírnir fékk það að láni til að fría til Gerðar – Freyr missti þannig sverðið", bonus: "🌟 Snjallur! Farðu 4 reiti áfram!" },
+      { spurning: "Hvað heitir hallinn þar sem Frigg og Freya sitja og hlustar á bænir manna?", svar: "Fensalir (Frigg) – en Freya tekur við helming fallinna stríðsmanna í Sessrúmnir", bonus: "🌟 Frábært! Farðu 3 reiti áfram!" },
+      { spurning: "Hvernig var Baldur drepinn og af hverjum?", svar: "Hann var drepinn af mistilteini sem Loki leiddi blindan Höð til að kasta", bonus: "🌟 Þú þekkir harmleikinn! Kastaðu aftur!" },
+      { spurning: "Hvað heita tveir hrafnar Óðins og hvað gera þeir?", svar: "Huginn og Muninn – þeir fljúga um heiminn og flytja Óðni fréttir", bonus: "🌟 Hrafnar bera boð þitt – Farðu 3 reiti áfram!" },
+      { spurning: "Hvað heitir brúin sem tengir Ásgarð og Miðgarð?", svar: "Bifröst (regnbogabrúin)", bonus: "🌈 Bifröst opnar þér leið – Farðu 4 reiti áfram!" },
+      { spurning: "Hvað heitir úlfurinn sem Týr fórnaði hendi sinni til að binda?", svar: "Fenrir (Fenrisúlfurinn)", bonus: "🌟 Hugrekki Týs lifir í þér – Kastaðu aftur!" },
+      { spurning: "Hvað heitir meðal þeirra sem fara til Heljar þegar þeir deyja?", svar: "Níðstöng / Hel – ríki Heljar dóttur Loka", bonus: "🌟 Þekking í Heljar ríki! Farðu 3 reiti áfram!" },
+      { spurning: "Hvað er Ragnarök og hverjir lifa af?", svar: "Endalok heimsins og goðanna – Líf og Lífþrasir lifa af í Hoddmímis holt", bonus: "🌟 Þú lýkur hringnum! Farðu 4 reiti áfram!" },
+      { spurning: "Hvernig fékk Óðinn rúnarnar?", svar: "Hann hékk níu nætur á Yggdrasil, stunginn af geir, sem fórn til sjálfs sín", bonus: "🌟 Óðinn fagnandi! Kastaðu aftur!" },
+    ],
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    // --------------------------------------------------
+    // BÖLVUNARREITIR – rangt svar gefur refsingu
+    // (Gildur spurningar sem auðvelt er að rugla)
+    // --------------------------------------------------
+    bolvun: [
+      { spurning: "Hver er faðir Loka samkvæmt Eddum?", svar: "Fárbauti (jötunn) – EKKI Óðinn, þótt þeir séu blóðbræður", refsing: "💀 Loki lætur þig þjást – Farðu 3 reiti aftur!" },
+      { spurning: "Hvað heitir heimur dauðra sem ekki féllu í bardaga?", svar: "Niflheim / Helheimur – ríki Heljar", refsing: "💀 Hel krefst refsingar – Misstu umferð!" },
+      { spurning: "Hvað heitir gígantíski öxinn sem Þór fiskur með Ýmis?", svar: "Þór fiskur Miðgarðsorminn, EKKI með yx – hann notar höfuð nauts sem beitu", refsing: "💀 Ruglingur í fiski – Farðu 2 reiti aftur!" },
+      { spurning: "Hvað heitir dóttir Loka sem ræður yfir dauðaríkinu?", svar: "Hel", refsing: "💀 Hel tekur þig – Misstu umferð!" },
+      { spurning: "Hvaða guð ríður hestinn Sleipni?", svar: "Óðinn – Sleipnir er sonur Loka og Svaðilfara", refsing: "💀 Sleipnir stígur þig – Farðu 3 reiti aftur!" },
+      { spurning: "Hvað heitir eiturormurinn sem drepur Þór við Ragnarök?", svar: "Miðgarðsormurinn (Jörmungandr)", refsing: "💀 Ormurinn svelgur þig – Misstu umferð!" },
+      { spurning: "Hvað heitir gullhringurinn sem Óðinn á og hverjar eru gæður hans?", svar: "Draupnir – hann þeytti átta jafnþunga hringa á níu nætna fresti", refsing: "💀 Draupnir rennur úr höndum þér – Farðu 3 reiti aftur!" },
+      { spurning: "Hvað heitir öxin sem Freyr gefur Skírni? Hvers vegna er þetta mikilvægt?", svar: "Þetta er ekki öx – Freyr gaf Skírni SVERÐ sitt, sem kostar hann dýrt við Ragnarök", refsing: "💀 Freyr er reiður – Misstu umferð!" },
+      { spurning: "Hvað heitir ísskál þar sem Níðhöggur dvelur við Ragnarök?", svar: "Náströnd – strand náa, þar sem Níðhöggur gnagar líkin", refsing: "💀 Náströnd gleymir þér ekki – Farðu 2 reiti aftur!" },
+      { spurning: "Hvenær á Loki að brjótast laus og stýra Naglfar?", svar: "Við Ragnarök – þá brotnar hann laus úr böndum sínum", refsing: "💀 Loki losnar og refsar þér – Farðu 3 reiti aftur!" },
+      { spurning: "Hvað heitir hestfær son Óðins sem á að ríkja eftir Ragnarök?", svar: "Víðarr og Váli – Víðarr drepur Fenrir, Váli drepur Höð", refsing: "💀 Þú týndir arftaka – Misstu umferð!" },
+    ]
+  };
+
+  // =============================================
+  // STÖÐUBREYTUR
+  // =============================================
+  let núverAndTegund = null;       // 'venjulegur' | 'blessun' | 'bolvun'
+  let núverSpurning = null;         // núverandi spurningarhlutur
+  let svarSýnt = false;             // hvort svarið er sýnilegt
+  let niðurstaðaSýnd = false;       // hvort niðurstöðan er sýnileg
+  let teljariHeild = 0;
+  let teljariRett = 0;
+  let teljariRangt = 0;
+
+  // Fylgist með hvaða spurningar hafa verið notaðar (til að endurtaka síður)
+  let notaðarSpurningar = { venjulegur: [], blessun: [], bolvun: [] };
+
+  // =============================================
+  // VELJA TEGUND
+  // =============================================
+  function velja(tegund) {
+    núverAndTegund = tegund;
+
+    // Uppfæra active-class á tökkum
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.type-btn.${tegund}`).classList.add('active');
+
+    // Fela leiðbeiningu, sýna kort
+    document.getElementById('leidbeining').style.display = 'none';
+    document.getElementById('spurningakort').style.display = 'block';
+
+    nýSpurning();
   }
-  return arr;
-}
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  pool = shuffle(getPool());
-  seen = 0;
-  nextQuestion();
-}
+  // =============================================
+  // NÝ SPURNING
+  // =============================================
+  function nýSpurning() {
+    if (!núverAndTegund) return;
 
-function nextQuestion() {
-  if (pool.length === 0 || seen >= pool.length) {
-    pool = shuffle(getPool());
-    seen = 0;
+    const listi = spurningar[núverAndTegund];
+
+    // Ef allar spurningar hafa verið notaðar, endurstilla lista
+    if (notaðarSpurningar[núverAndTegund].length >= listi.length) {
+      notaðarSpurningar[núverAndTegund] = [];
+    }
+
+    // Veldu handahófskennd spurningu sem hefur ekki verið notuð
+    let laus = listi
+      .map((_, i) => i)
+      .filter(i => !notaðarSpurningar[núverAndTegund].includes(i));
+
+    const valinn = laus[Math.floor(Math.random() * laus.length)];
+    notaðarSpurningar[núverAndTegund].push(valinn);
+    núverSpurning = listi[valinn];
+
+    // Uppfæra UI
+    setTegundUI(núverAndTegund);
+    document.getElementById('spurning-texti').textContent = núverSpurning.spurning;
+
+    // Fela svar og niðurstöðu
+    document.getElementById('svar-svædi').style.display = 'none';
+    document.getElementById('niðurstaða').style.display = 'none';
+    document.getElementById('svar-texti').textContent = '';
+    svarSýnt = false;
+    niðurstaðaSýnd = false;
+
+    // Virkja/afvirkja takka
+    document.getElementById('takki-svar').disabled = false;
+    document.getElementById('takki-rett').disabled = true;
+    document.getElementById('takki-rangt').disabled = true;
+
+    // Teljari uppfærður
+    teljariHeild++;
+    uppfæraTeljara();
   }
-  currentQ = pool[seen++];
-  document.getElementById('q-num').textContent = '#' + currentQ.n;
-  document.getElementById('q-text').textContent = currentQ.q;
-  const badge = document.getElementById('q-badge');
-  if (currentQ.cat === 'easy')   { badge.textContent = 'Létt';    badge.className = 'badge badge-easy'; }
-  if (currentQ.cat === 'medium') { badge.textContent = 'Grunnur'; badge.className = 'badge badge-medium'; }
-  if (currentQ.cat === 'hard')   { badge.textContent = 'Erfitt';  badge.className = 'badge badge-hard'; }
-  document.getElementById('answer-box').style.display = 'none';
-  document.getElementById('reveal-btn').style.display = 'inline-block';
-  document.getElementById('counter').textContent = 'Spurningu ' + seen + ' af ' + pool.length;
-}
 
-function revealAnswer() {
-  document.getElementById('answer-box').textContent = currentQ.a;
-  document.getElementById('answer-box').style.display = 'block';
-  document.getElementById('reveal-btn').style.display = 'none';
-}
+  // =============================================
+  // SÝNA SVAR
+  // =============================================
+  function sýnaSvar() {
+    if (!núverSpurning) return;
+    document.getElementById('svar-texti').textContent = núverSpurning.svar;
+    document.getElementById('svar-svædi').style.display = 'block';
+    document.getElementById('takki-svar').disabled = true;
+    document.getElementById('takki-rett').disabled = false;
+    document.getElementById('takki-rangt').disabled = false;
+    svarSýnt = true;
+  }
 
-pool = shuffle(getPool());
-nextQuestion();
+  // =============================================
+  // SVARAÐ – rétt eða rangt
+  // =============================================
+  function svarað(útkoma) {
+    if (!núverSpurning || niðurstaðaSýnd) return;
+    niðurstaðaSýnd = true;
+
+    const nd = document.getElementById('niðurstaða');
+    const ndHaus = document.getElementById('niðurstaða-haus');
+    const ndTexti = document.getElementById('niðurstaða-texti');
+
+    // Afvirkja takka
+    document.getElementById('takki-rett').disabled = true;
+    document.getElementById('takki-rangt').disabled = true;
+
+    // Uppfæra teljara
+    if (útkoma === 'rett') teljariRett++;
+    else teljariRangt++;
+    uppfæraTeljara();
+
+    nd.style.display = 'block';
+    nd.className = ''; // hreinsa gamla class
+
+    if (núverAndTegund === 'venjulegur') {
+      if (útkoma === 'rett') {
+        nd.classList.add('niðurstaða', 'n-rett');
+        ndHaus.textContent = '✅ Rétt svarað!';
+        ndTexti.textContent = núverSpurning.bonus;
+      } else {
+        nd.classList.add('niðurstaða', 'n-ekkert');
+        ndHaus.textContent = '❌ Rangt svar';
+        ndTexti.textContent = 'Ekkert gerist – leikurinn heldur áfram eðlilega.';
+      }
+    } else if (núverAndTegund === 'blessun') {
+      if (útkoma === 'rett') {
+        nd.classList.add('niðurstaða', 'n-rett');
+        ndHaus.textContent = '🌟 Frábært! Blessuð þú ert!';
+        ndTexti.textContent = núverSpurning.bonus;
+      } else {
+        nd.classList.add('niðurstaða', 'n-ekkert');
+        ndHaus.textContent = '❌ Rangt svar';
+        ndTexti.textContent = 'Ekkert gerist – þú missar af blessuninni.';
+      }
+    } else if (núverAndTegund === 'bolvun') {
+      if (útkoma === 'rett') {
+        nd.classList.add('niðurstaða', 'n-ekkert');
+        ndHaus.textContent = '✅ Rétt! Þú komst hjá bölvuninni!';
+        ndTexti.textContent = 'Farðu áfram eðlilega – ekkert gerist.';
+      } else {
+        nd.classList.add('niðurstaða', 'n-rangt');
+        ndHaus.textContent = '💀 Rangt svar – bölvunin slær til!';
+        ndTexti.textContent = núverSpurning.refsing;
+      }
+    }
+  }
+
+  // =============================================
+  // HJÁLPARFÖLL
+  // =============================================
+  function setTegundUI(tegund) {
+    const merki = document.getElementById('tegund-merki');
+    const texti = document.getElementById('tegund-texti');
+    merki.className = 'tegund-merki'; // hreinsa
+
+    if (tegund === 'venjulegur') {
+      merki.classList.add('merki-venjulegur');
+      merki.textContent = '🔵 Venjulegur reitur';
+      texti.textContent = 'Rétt svar: +1 reit';
+    } else if (tegund === 'blessun') {
+      merki.classList.add('merki-blessun');
+      merki.textContent = '⭐ Blessunarreitur';
+      texti.textContent = 'Rétt svar: Stórt verðlaun';
+    } else if (tegund === 'bolvun') {
+      merki.classList.add('merki-bolvun');
+      merki.textContent = '💀 Bölvunarreitur';
+      texti.textContent = 'Rangt svar: Refsing';
+    }
+  }
+
+  function uppfæraTeljara() {
+    document.getElementById('teljari-heild').textContent = teljariHeild;
+    document.getElementById('teljari-rett').textContent = teljariRett;
+    document.getElementById('teljari-rangt').textContent = teljariRangt;
+  }
 </script>
+
 </body>
 </html>
